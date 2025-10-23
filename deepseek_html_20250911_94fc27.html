@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Streaming Clean Viewer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+        }
+        video {
+            width: 100%;
+            background-color: #000;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        input[type="text"] {
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #333;
+            color: #fff;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .instructions {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+        .instructions h3 {
+            margin-top: 0;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            input[type="text"], button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Live Streaming Clean Viewer</h1>
+            <p>Nikmati live streaming tanpa gangguan efek yang melayang</p>
+        </div>
+        
+        <div class="video-container">
+            <video id="videoPlayer" controls></video>
+        </div>
+        
+        <div class="controls">
+            <input type="text" id="streamUrl" placeholder="Tempalkan link M3U8 di sini">
+            <button onclick="loadStream()">Putar Stream</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>Cara menggunakan:</h3>
+            <ol>
+                <li>Buka website streaming yang ingin Anda tonton</li>
+                <li>Klik kanan pada halaman dan pilih "Inspect" atau "Inspect Element"</li>
+                <li>Buka tab "Network" di tools developer</li>
+                <li>Refresh halaman dan cari request dengan jenis "media" atau filter dengan "m3u8"</li>
+                <li>Klik kanan pada request tersebut dan pilih "Copy URL"</li>
+                <li>Tempelkan URL yang disalin ke dalam input di atas</li>
+                <li>Klik tombol "Putar Stream"</li>
+            </ol>
+            <p><strong>Catatan:</strong> Beberapa website mungkin menggunakan proteksi yang memerlukan header atau token khusus. Dalam kasus tersebut, solusi ini mungkin tidak bekerja.</p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Digunakan untuk keperluan pribadi dan pendidikan | HLS.js digunakan untuk memutar stream M3U8</p>
+    </div>
+
+    <!-- Load HLS.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        function loadStream() {
+            const streamUrl = document.getElementById('streamUrl').value;
+            const video = document.getElementById('videoPlayer');
+            
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // For Safari
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play();
+                });
+            } else {
+                alert('Browser Anda tidak mendukung pemutaran stream HLS.');
+            }
+        }
+        
+        // Optional: Auto-load if URL parameter is present
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamParam = urlParams.get('stream');
+        if (streamParam) {
+            document.getElementById('streamUrl').value = streamParam;
+            loadStream();
+        }
+    </script>
+</body>
+</html>
