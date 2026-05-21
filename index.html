@@ -1,165 +1,457 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Live Streaming Clean Viewer</title>
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background-color: #1a1a1a;
             color: #fff;
         }
+
         .container {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
+
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
+
+        /* VIDEO AREA */
         .video-container {
             position: relative;
             width: 100%;
+            max-width: 1000px;
             margin: 0 auto;
+            background: #000;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
+
+        /*
+            Wrapper aspect ratio:
+            Default = 16:9
+        */
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            overflow: hidden;
+        }
+
+        /*
+            Vertical mode 9:16
+        */
+        .video-wrapper.vertical-mode {
+            aspect-ratio: 9 / 16;
+            max-height: 95vh;
+            margin: auto;
+        }
+
         video {
             width: 100%;
-            background-color: #000;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            height: 100%;
+            background: #000;
+            display: block;
+            transition: transform 0.25s ease;
         }
+
+        /*
+            Default fit
+        */
+        video.fit {
+            object-fit: contain;
+        }
+
+        /*
+            Crop / zoom mode
+        */
+        video.crop {
+            object-fit: cover;
+        }
+
+        /*
+            Fullscreen vertical
+        */
+        .video-wrapper.vertical-mode:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            aspect-ratio: 9 / 16;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: black;
+        }
+
         .controls {
             display: flex;
             flex-direction: column;
             gap: 15px;
             background-color: #2a2a2a;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 10px;
         }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         input[type="text"] {
             padding: 12px;
             border: 1px solid #444;
-            border-radius: 4px;
+            border-radius: 6px;
             background-color: #333;
             color: #fff;
             font-size: 16px;
         }
+
         button {
-            padding: 12px 20px;
+            padding: 12px 18px;
             background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+            font-size: 15px;
+            transition: 0.2s;
         }
+
         button:hover {
-            background-color: #45a049;
+            opacity: 0.9;
         }
+
+        .secondary {
+            background: #444;
+        }
+
+        .active {
+            background: #ff9800;
+        }
+
         .instructions {
             background-color: #2a2a2a;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             line-height: 1.6;
         }
-        .instructions h3 {
-            margin-top: 0;
-        }
-        .instructions ol {
-            padding-left: 20px;
-        }
-        .instructions li {
-            margin-bottom: 10px;
-        }
+
         .footer {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 20px;
             color: #888;
             font-size: 14px;
         }
+
         @media (max-width: 768px) {
-            .container {
+            body {
                 padding: 10px;
             }
-            input[type="text"], button {
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
                 width: 100%;
             }
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Live Streaming Clean Viewer</h1>
-            <p>Nikmati live streaming tanpa gangguan efek yang melayang</p>
-        </div>
-        
-        <div class="video-container">
-            <video id="videoPlayer" controls></video>
-        </div>
-        
-        <div class="controls">
-            <input type="text" id="streamUrl" placeholder="Tempalkan link M3U8 di sini">
-            <button onclick="loadStream()">Putar Stream</button>
-        </div>
-        
-        <div class="instructions">
-            <h3>Cara menggunakan:</h3>
-            <ol>
-                <li>Buka website streaming yang ingin Anda tonton</li>
-                <li>Klik kanan pada halaman dan pilih "Inspect" atau "Inspect Element"</li>
-                <li>Buka tab "Network" di tools developer</li>
-                <li>Refresh halaman dan cari request dengan jenis "media" atau filter dengan "m3u8"</li>
-                <li>Klik kanan pada request tersebut dan pilih "Copy URL"</li>
-                <li>Tempelkan URL yang disalin ke dalam input di atas</li>
-                <li>Klik tombol "Putar Stream"</li>
-            </ol>
-            <p><strong>Catatan:</strong> Beberapa website mungkin menggunakan proteksi yang memerlukan header atau token khusus. Dalam kasus tersebut, solusi ini mungkin tidak bekerja.</p>
-        </div>
-    </div>
-    
-    <div class="footer">
-        <p>Digunakan untuk keperluan pribadi dan pendidikan | HLS.js digunakan untuk memutar stream M3U8</p>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Live Streaming Clean Viewer</h1>
+        <p>Mode crop vertikal 9:16 + fullscreen TikTok/Reels style</p>
     </div>
 
-    <!-- Load HLS.js library -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script>
-        function loadStream() {
-            const streamUrl = document.getElementById('streamUrl').value;
-            const video = document.getElementById('videoPlayer');
-            
-            if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(streamUrl);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play();
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // For Safari
-                video.src = streamUrl;
-                video.addEventListener('loadedmetadata', function() {
-                    video.play();
-                });
-            } else {
-                alert('Browser Anda tidak mendukung pemutaran stream HLS.');
+    <!-- VIDEO -->
+    <div class="video-container">
+
+        <div class="video-wrapper" id="videoWrapper">
+
+            <video
+                id="videoPlayer"
+                class="fit"
+                controls
+                playsinline
+            ></video>
+
+        </div>
+
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+
+        <input
+            type="text"
+            id="streamUrl"
+            placeholder="Tempel link M3U8 di sini"
+        >
+
+        <div class="button-group">
+
+            <button onclick="loadStream()">
+                Putar Stream
+            </button>
+
+            <button
+                class="secondary"
+                id="cropBtn"
+                onclick="toggleCrop()"
+            >
+                Crop OFF
+            </button>
+
+            <button
+                class="secondary"
+                id="verticalBtn"
+                onclick="toggleVerticalMode()"
+            >
+                Mode 9:16 OFF
+            </button>
+
+            <button
+                class="secondary"
+                onclick="fullscreenVertical()"
+            >
+                Fullscreen Vertikal
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- INSTRUCTIONS -->
+<div class="instructions">
+
+    <h3>Cara menggunakan:</h3>
+
+    <ol>
+        <li>
+            Buka website streaming yang ingin Anda tonton
+        </li>
+
+        <li>
+            Klik kanan pada halaman dan pilih
+            "Inspect" atau "Inspect Element"
+        </li>
+
+        <li>
+            Buka tab "Network" di tools developer
+        </li>
+
+        <li>
+            Refresh halaman dan cari request dengan jenis
+            "media" atau filter dengan "m3u8"
+        </li>
+
+        <li>
+            Klik kanan pada request tersebut dan pilih
+            "Copy URL"
+        </li>
+
+        <li>
+            Tempelkan URL yang disalin ke dalam input di atas
+        </li>
+
+        <li>
+            Klik tombol "Putar Stream"
+        </li>
+    </ol>
+
+    <p>
+        <strong>Catatan:</strong>
+        Beberapa website mungkin menggunakan proteksi
+        yang memerlukan header atau token khusus.
+        Dalam kasus tersebut, solusi ini mungkin tidak bekerja.
+    </p>
+
+</div>
+
+<div class="footer">
+    <p>
+        HLS.js digunakan untuk memutar stream M3U8
+    </p>
+</div>
+
+<!-- HLS.js -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+
+    const video = document.getElementById("videoPlayer");
+    const wrapper = document.getElementById("videoWrapper");
+
+    const cropBtn = document.getElementById("cropBtn");
+    const verticalBtn = document.getElementById("verticalBtn");
+
+    let cropEnabled = false;
+    let verticalEnabled = false;
+
+    let hls;
+
+    // LOAD STREAM
+    function loadStream() {
+
+        const streamUrl =
+            document.getElementById("streamUrl").value.trim();
+
+        if (!streamUrl) {
+            alert("Masukkan URL stream terlebih dahulu");
+            return;
+        }
+
+        // destroy previous
+        if (hls) {
+            hls.destroy();
+        }
+
+        if (Hls.isSupported()) {
+
+            hls = new Hls();
+
+            hls.loadSource(streamUrl);
+
+            hls.attachMedia(video);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+
+                video.play();
+
+            });
+
+        } else if (
+            video.canPlayType("application/vnd.apple.mpegurl")
+        ) {
+
+            video.src = streamUrl;
+
+            video.addEventListener("loadedmetadata", function () {
+
+                video.play();
+
+            });
+
+        } else {
+
+            alert(
+                "Browser Anda tidak mendukung HLS"
+            );
+
+        }
+    }
+
+    // TOGGLE CROP
+    function toggleCrop() {
+
+        cropEnabled = !cropEnabled;
+
+        if (cropEnabled) {
+
+            video.classList.remove("fit");
+            video.classList.add("crop");
+
+            cropBtn.innerText = "Crop ON";
+            cropBtn.classList.add("active");
+
+        } else {
+
+            video.classList.remove("crop");
+            video.classList.add("fit");
+
+            cropBtn.innerText = "Crop OFF";
+            cropBtn.classList.remove("active");
+
+        }
+    }
+
+    // TOGGLE 9:16 MODE
+    function toggleVerticalMode() {
+
+        verticalEnabled = !verticalEnabled;
+
+        if (verticalEnabled) {
+
+            wrapper.classList.add("vertical-mode");
+
+            verticalBtn.innerText = "Mode 9:16 ON";
+            verticalBtn.classList.add("active");
+
+        } else {
+
+            wrapper.classList.remove("vertical-mode");
+
+            verticalBtn.innerText = "Mode 9:16 OFF";
+            verticalBtn.classList.remove("active");
+
+        }
+    }
+
+    // FULLSCREEN VERTICAL
+    async function fullscreenVertical() {
+
+        // otomatis aktifkan vertical mode
+        if (!verticalEnabled) {
+            toggleVerticalMode();
+        }
+
+        try {
+
+            if (wrapper.requestFullscreen) {
+
+                await wrapper.requestFullscreen();
+
+            } else if (wrapper.webkitRequestFullscreen) {
+
+                await wrapper.webkitRequestFullscreen();
+
             }
+
+        } catch (err) {
+
+            console.error(err);
+
         }
-        
-        // Optional: Auto-load if URL parameter is present
-        const urlParams = new URLSearchParams(window.location.search);
-        const streamParam = urlParams.get('stream');
-        if (streamParam) {
-            document.getElementById('streamUrl').value = streamParam;
-            loadStream();
-        }
-    </script>
+    }
+
+    // AUTO LOAD FROM URL PARAM
+    const urlParams = new URLSearchParams(
+        window.location.search
+    );
+
+    const streamParam = urlParams.get("stream");
+
+    if (streamParam) {
+
+        document.getElementById("streamUrl").value =
+            streamParam;
+
+        loadStream();
+
+    }
+
+</script>
+
 </body>
 </html>
