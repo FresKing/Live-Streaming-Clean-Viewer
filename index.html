@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Live Streaming Clean Viewer</title>
+
+    <title>Live Streaming Multi Viewer</title>
 
     <style>
+
         * {
             box-sizing: border-box;
         }
 
         body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
+            margin: 0;
             padding: 20px;
-            background-color: #1a1a1a;
-            color: #fff;
+            background: #111;
+            color: white;
+            font-family: "Segoe UI", sans-serif;
         }
 
         .container {
@@ -27,84 +28,16 @@
 
         .header {
             text-align: center;
-            margin-bottom: 10px;
-        }
-
-        /* VIDEO AREA */
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 1000px;
-            margin: 0 auto;
-            background: #000;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        /*
-            Wrapper aspect ratio:
-            Default = 16:9
-        */
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #000;
-            overflow: hidden;
-        }
-
-        /*
-            Vertical mode 9:16
-        */
-        .video-wrapper.vertical-mode {
-            aspect-ratio: 9 / 16;
-            max-height: 95vh;
-            margin: auto;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            background: #000;
-            display: block;
-            transition: transform 0.25s ease;
-        }
-
-        /*
-            Default fit
-        */
-        video.fit {
-            object-fit: contain;
-        }
-
-        /*
-            Crop / zoom mode
-        */
-        video.crop {
-            object-fit: cover;
-        }
-
-        /*
-            Fullscreen vertical
-        */
-        .video-wrapper.vertical-mode:fullscreen {
-            width: 100vw;
-            height: 100vh;
-            aspect-ratio: 9 / 16;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: black;
         }
 
         .controls {
+            background: #1f1f1f;
+            padding: 20px;
+            border-radius: 12px;
+
             display: flex;
             flex-direction: column;
             gap: 15px;
-            background-color: #2a2a2a;
-            padding: 20px;
-            border-radius: 10px;
         }
 
         .button-group {
@@ -113,22 +46,23 @@
             gap: 10px;
         }
 
-        input[type="text"] {
-            padding: 12px;
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
             border: 1px solid #444;
-            border-radius: 6px;
-            background-color: #333;
-            color: #fff;
-            font-size: 16px;
+            background: #2c2c2c;
+            color: white;
+            font-size: 15px;
         }
 
         button {
             padding: 12px 18px;
-            background-color: #4CAF50;
-            color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
+            background: #4CAF50;
+            color: white;
             font-size: 15px;
             transition: 0.2s;
         }
@@ -141,37 +75,96 @@
             background: #444;
         }
 
+        .danger {
+            background: #e53935;
+        }
+
         .active {
             background: #ff9800;
         }
 
+        /* MULTI GRID */
+
+        .streams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .stream-card {
+            background: #1a1a1a;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 1px solid #2f2f2f;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: black;
+            overflow: hidden;
+        }
+
+        .video-wrapper.vertical-mode {
+            aspect-ratio: 9/16;
+            max-height: 90vh;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: black;
+            object-fit: contain;
+            transition: 0.25s ease;
+        }
+
+        video.crop {
+            object-fit: cover;
+        }
+
+        .stream-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+        }
+
         .instructions {
-            background-color: #2a2a2a;
+            background: #1f1f1f;
             padding: 20px;
-            border-radius: 10px;
-            line-height: 1.6;
+            border-radius: 12px;
+            line-height: 1.7;
         }
 
         .footer {
             text-align: center;
-            margin-top: 20px;
             color: #888;
-            font-size: 14px;
+            margin-top: 10px;
         }
 
         @media (max-width: 768px) {
+
             body {
                 padding: 10px;
             }
 
-            .button-group {
+            .streams-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stream-controls {
                 flex-direction: column;
             }
 
             button {
                 width: 100%;
             }
+
         }
+
     </style>
 </head>
 
@@ -180,24 +173,10 @@
 <div class="container">
 
     <div class="header">
-        <h1>Live Streaming Clean Viewer</h1>
-        <p>Mode crop vertikal 9:16 + fullscreen TikTok/Reels style</p>
-    </div>
-
-    <!-- VIDEO -->
-    <div class="video-container">
-
-        <div class="video-wrapper" id="videoWrapper">
-
-            <video
-                id="videoPlayer"
-                class="fit"
-                controls
-                playsinline
-            ></video>
-
-        </div>
-
+        <h1>Live Streaming Multi Viewer</h1>
+        <p>
+            Multi Stream + Crop 9:16 + Fullscreen Vertical
+        </p>
     </div>
 
     <!-- CONTROLS -->
@@ -211,210 +190,293 @@
 
         <div class="button-group">
 
-            <button onclick="loadStream()">
-                Putar Stream
+            <button onclick="addStream()">
+                Tambah Stream
             </button>
 
             <button
                 class="secondary"
-                id="cropBtn"
-                onclick="toggleCrop()"
+                onclick="removeAllStreams()"
             >
-                Crop OFF
-            </button>
-
-            <button
-                class="secondary"
-                id="verticalBtn"
-                onclick="toggleVerticalMode()"
-            >
-                Mode 9:16 OFF
-            </button>
-
-            <button
-                class="secondary"
-                onclick="fullscreenVertical()"
-            >
-                Fullscreen Vertikal
+                Hapus Semua
             </button>
 
         </div>
 
     </div>
 
+    <!-- STREAM GRID -->
+    <div
+        class="streams-grid"
+        id="streamsGrid"
+    ></div>
+
     <!-- INSTRUCTIONS -->
-<div class="instructions">
+    <div class="instructions">
 
-    <h3>Cara menggunakan:</h3>
+        <h3>Cara menggunakan:</h3>
 
-    <ol>
-        <li>
-            Buka website streaming yang ingin Anda tonton
-        </li>
+        <ol>
+            <li>
+                Buka website streaming yang ingin Anda tonton
+            </li>
 
-        <li>
-            Klik kanan pada halaman dan pilih
-            "Inspect" atau "Inspect Element"
-        </li>
+            <li>
+                Klik kanan pada halaman dan pilih
+                "Inspect" atau "Inspect Element"
+            </li>
 
-        <li>
-            Buka tab "Network" di tools developer
-        </li>
+            <li>
+                Buka tab "Network" di tools developer
+            </li>
 
-        <li>
-            Refresh halaman dan cari request dengan jenis
-            "media" atau filter dengan "m3u8"
-        </li>
+            <li>
+                Refresh halaman dan cari request dengan jenis
+                "media" atau filter dengan "m3u8"
+            </li>
 
-        <li>
-            Klik kanan pada request tersebut dan pilih
-            "Copy URL"
-        </li>
+            <li>
+                Klik kanan pada request tersebut dan pilih
+                "Copy URL"
+            </li>
 
-        <li>
-            Tempelkan URL yang disalin ke dalam input di atas
-        </li>
+            <li>
+                Tempelkan URL yang disalin ke dalam input di atas
+            </li>
 
-        <li>
-            Klik tombol "Putar Stream"
-        </li>
-    </ol>
+            <li>
+                Klik tombol "Tambah Stream"
+            </li>
+        </ol>
 
-    <p>
-        <strong>Catatan:</strong>
-        Beberapa website mungkin menggunakan proteksi
-        yang memerlukan header atau token khusus.
-        Dalam kasus tersebut, solusi ini mungkin tidak bekerja.
-    </p>
+        <p>
+            <strong>Catatan:</strong>
+            Beberapa website mungkin menggunakan proteksi
+            yang memerlukan header atau token khusus.
+            Dalam kasus tersebut, solusi ini mungkin tidak bekerja.
+        </p>
 
-</div>
+    </div>
 
-<div class="footer">
-    <p>
+    <div class="footer">
         HLS.js digunakan untuk memutar stream M3U8
-    </p>
+    </div>
+
 </div>
 
-<!-- HLS.js -->
+<!-- HLS -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
 
-    const video = document.getElementById("videoPlayer");
-    const wrapper = document.getElementById("videoWrapper");
+    const streamsGrid =
+        document.getElementById("streamsGrid");
 
-    const cropBtn = document.getElementById("cropBtn");
-    const verticalBtn = document.getElementById("verticalBtn");
+    let streamCount = 0;
 
-    let cropEnabled = false;
-    let verticalEnabled = false;
-
-    let hls;
-
-    // LOAD STREAM
-    function loadStream() {
+    // ADD STREAM
+    function addStream() {
 
         const streamUrl =
             document.getElementById("streamUrl").value.trim();
 
         if (!streamUrl) {
-            alert("Masukkan URL stream terlebih dahulu");
+
+            alert("Masukkan URL stream");
+
             return;
+
         }
 
-        // destroy previous
-        if (hls) {
-            hls.destroy();
-        }
+        streamCount++;
 
+        const streamId =
+            "stream_" + streamCount;
+
+        // CARD
+        const card =
+            document.createElement("div");
+
+        card.className = "stream-card";
+
+        card.innerHTML = `
+
+            <div
+                class="video-wrapper"
+                id="wrapper_${streamId}"
+            >
+
+                <video
+                    id="${streamId}"
+                    controls
+                    autoplay
+                    playsinline
+                ></video>
+
+            </div>
+
+            <div class="stream-controls">
+
+                <button
+                    onclick="toggleCrop('${streamId}')"
+                    id="crop_${streamId}"
+                    class="secondary"
+                >
+                    Crop OFF
+                </button>
+
+                <button
+                    onclick="toggleVertical('${streamId}')"
+                    id="vertical_${streamId}"
+                    class="secondary"
+                >
+                    9:16 OFF
+                </button>
+
+                <button
+                    onclick="fullscreenStream('${streamId}')"
+                    class="secondary"
+                >
+                    Fullscreen
+                </button>
+
+                <button
+                    onclick="removeStream(this)"
+                    class="danger"
+                >
+                    Tutup
+                </button>
+
+            </div>
+
+        `;
+
+        streamsGrid.appendChild(card);
+
+        const video =
+            document.getElementById(streamId);
+
+        // LOAD HLS
         if (Hls.isSupported()) {
 
-            hls = new Hls();
+            const hls = new Hls({
+
+                enableWorker: true,
+                lowLatencyMode: true
+
+            });
 
             hls.loadSource(streamUrl);
 
             hls.attachMedia(video);
 
-            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            hls.on(
+                Hls.Events.MANIFEST_PARSED,
+                function () {
 
-                video.play();
+                    video.play();
 
-            });
+                }
+            );
 
         } else if (
-            video.canPlayType("application/vnd.apple.mpegurl")
+            video.canPlayType(
+                "application/vnd.apple.mpegurl"
+            )
         ) {
 
             video.src = streamUrl;
 
-            video.addEventListener("loadedmetadata", function () {
+            video.addEventListener(
+                "loadedmetadata",
+                function () {
 
-                video.play();
+                    video.play();
 
-            });
+                }
+            );
 
         } else {
 
             alert(
-                "Browser Anda tidak mendukung HLS"
+                "Browser tidak mendukung HLS"
             );
 
         }
+
     }
 
     // TOGGLE CROP
-    function toggleCrop() {
+    function toggleCrop(streamId) {
 
-        cropEnabled = !cropEnabled;
+        const video =
+            document.getElementById(streamId);
 
-        if (cropEnabled) {
+        const button =
+            document.getElementById(
+                "crop_" + streamId
+            );
 
-            video.classList.remove("fit");
-            video.classList.add("crop");
+        video.classList.toggle("crop");
 
-            cropBtn.innerText = "Crop ON";
-            cropBtn.classList.add("active");
+        if (
+            video.classList.contains("crop")
+        ) {
 
-        } else {
-
-            video.classList.remove("crop");
-            video.classList.add("fit");
-
-            cropBtn.innerText = "Crop OFF";
-            cropBtn.classList.remove("active");
-
-        }
-    }
-
-    // TOGGLE 9:16 MODE
-    function toggleVerticalMode() {
-
-        verticalEnabled = !verticalEnabled;
-
-        if (verticalEnabled) {
-
-            wrapper.classList.add("vertical-mode");
-
-            verticalBtn.innerText = "Mode 9:16 ON";
-            verticalBtn.classList.add("active");
+            button.innerText = "Crop ON";
+            button.classList.add("active");
 
         } else {
 
-            wrapper.classList.remove("vertical-mode");
-
-            verticalBtn.innerText = "Mode 9:16 OFF";
-            verticalBtn.classList.remove("active");
+            button.innerText = "Crop OFF";
+            button.classList.remove("active");
 
         }
+
     }
 
-    // FULLSCREEN VERTICAL
-    async function fullscreenVertical() {
+    // TOGGLE 9:16
+    function toggleVertical(streamId) {
 
-        // otomatis aktifkan vertical mode
-        if (!verticalEnabled) {
-            toggleVerticalMode();
+        const wrapper =
+            document.getElementById(
+                "wrapper_" + streamId
+            );
+
+        const button =
+            document.getElementById(
+                "vertical_" + streamId
+            );
+
+        wrapper.classList.toggle(
+            "vertical-mode"
+        );
+
+        if (
+            wrapper.classList.contains(
+                "vertical-mode"
+            )
+        ) {
+
+            button.innerText = "9:16 ON";
+            button.classList.add("active");
+
+        } else {
+
+            button.innerText = "9:16 OFF";
+            button.classList.remove("active");
+
         }
+
+    }
+
+    // FULLSCREEN
+    async function fullscreenStream(streamId) {
+
+        const wrapper =
+            document.getElementById(
+                "wrapper_" + streamId
+            );
 
         try {
 
@@ -422,7 +484,9 @@
 
                 await wrapper.requestFullscreen();
 
-            } else if (wrapper.webkitRequestFullscreen) {
+            } else if (
+                wrapper.webkitRequestFullscreen
+            ) {
 
                 await wrapper.webkitRequestFullscreen();
 
@@ -433,21 +497,50 @@
             console.error(err);
 
         }
+
     }
 
-    // AUTO LOAD FROM URL PARAM
-    const urlParams = new URLSearchParams(
-        window.location.search
-    );
+    // REMOVE SINGLE STREAM
+    function removeStream(button) {
 
-    const streamParam = urlParams.get("stream");
+        const card =
+            button.closest(".stream-card");
+
+        const video =
+            card.querySelector("video");
+
+        // stop stream
+        video.pause();
+
+        video.src = "";
+
+        card.remove();
+
+    }
+
+    // REMOVE ALL
+    function removeAllStreams() {
+
+        streamsGrid.innerHTML = "";
+
+    }
+
+    // AUTO LOAD URL PARAM
+    const urlParams =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const streamParam =
+        urlParams.get("stream");
 
     if (streamParam) {
 
-        document.getElementById("streamUrl").value =
-            streamParam;
+        document.getElementById(
+            "streamUrl"
+        ).value = streamParam;
 
-        loadStream();
+        addStream();
 
     }
 
